@@ -33,24 +33,45 @@
 
         # 3. Create the wrapper script that handles the devcontainer-like logic
         nvimWrapper = pkgs.writeScriptBin "nvim" ''
-          #!${pkgs.runtimeShell}
-          # This is the path to the base Neovim config installed by the flake
-          BASE_CONFIG_DIR="$(${pkgs.coreutils}/bin/dirname "$(readlink -f "$0")")/.."
-          BASE_CONFIG="$BASE_CONFIG_DIR${nvimConfigPath}"
+          #!/${pkgs.runtimeShell}
 
-          # Check for a project-local config in the current working directory
+          # --- Define Writable Config Path ---
+          # This is the path where the user can modify the config.
+          # We'll use the standard XDG_CONFIG_HOME if possible, but redirect it.
+          WRITABLE_CONFIG_DIR="$HOME/.config/nvim-global"
+
+          # 1. Copy-on-First-Run Logic: Only copies the config if the writable one doesn't exist.
+          if [ ! -d "$WRITABLE_CONFIG_DIR" ]; then
+            
+            # Get the Nix store path of the installed config (same logic as before)
+            NIX_STORE_CONFIG_ROOT="$(${pkgs.coreutils}/bin/dirname "$(readlink -f "$0")")/.."
+            NIX_CONFIG_PATH="$NIX_STORE_CONFIG_ROOT/share/nvim"
+            
+            echo "💡 Initializing writable Neovim config at: $WRITABLE_CONFIG_DIR" >&2
+            
+            # Copy the immutable config to the writable user path
+            ${pkgs.coreutils}/bin/mkdir -p "$WRITABLE_CONFIG_DIR"
+            ${pkgs.coreutils}/bin/cp -r "$NIX_CONFIG_PATH" "$WRITABLE_CONFIG_DIR/"
+          fi
+
+          # --- Configuration Logic ---
+          # We rely on the wrapper's local check OR the new writable config.
           if [ -d "./nvim" ]; then
-            # Project-local override: set XDG_CONFIG_HOME to $PWD to pick up ./nvim/init.lua
+            # Project-local override
             export XDG_CONFIG_HOME="$(${pkgs.coreutils}/bin/pwd)"
             echo "💡 Using project-local Neovim config: $XDG_CONFIG_HOME/nvim" >&2
           else
-            # Fallback to the atomic flake config
-            export XDG_CONFIG_HOME="$BASE_CONFIG_DIR"
-            echo "⚙️ Using atomic flake Neovim config: $BASE_CONFIG" >&2
+            # Fallback: Use the writable copy we just ensured exists (or existed already)
+            # Neovim looks for the 'nvim' directory, so we set XDG_CONFIG_HOME to the parent.
+            export XDG_CONFIG_HOME="$HOME/.config" 
+            echo "⚙️ Using global writable Neovim config: $WRITABLE_CONFIG_DIR" >&2
           fi
 
-          # Set the PATH for all tools in the derivation (now includes 'nil')
+          # Set the PATH for all tools (LSPs, etc.)
           export PATH="${pkgs.lib.makeBinPath nvimRuntimeDeps}:$PATH"
+
+          # Set XDG_DATA_HOME for cache/lock files to prevent Permission Denied errors
+          export XDG_DATA_HOME="$HOME/.local/share/nvim-global-data"
 
           # Execute Neovim
           exec ${pkgs.neovim}/bin/nvim "$@"
