@@ -17,4 +17,25 @@ vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
-require("lazy").setup("plugins")
+local plugins = {
+
+	{ import = "plugins" },
+	-- 1. nvim-lspconfig: Includes all setup logic now
+	{
+		"neovim/nvim-lspconfig",
+		lazy = false, -- Ensure it loads immediately
+		config = function()
+			-- All post-load configuration now runs here!
+
+			-- Load the file that enables LSP and sets keymaps
+			require("config.lsp_setup")
+
+			-- If you have other shared LSP configurations, they can also go here.
+		end,
+	},
+}
+
+-- The actual setup call
+require("lazy").setup(plugins, {
+	-- Add any global lazy options here
+})
