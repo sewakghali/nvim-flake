@@ -77,23 +77,3 @@ This guarantees that plugins can be installed and updated without throwing `Perm
   * **Quirk:** The very first time you launch `nvim` after a fresh installation (or after clearing your cache), you will likely encounter an error message on startup related to a missing Lua module or plugin.
   * **Cause:** This happens because the Lua configuration is loaded before the Lazy plugin manager has finished downloading and installing the dependencies into the `nvim-global-data` directory.
   * **Solution:** Simply **exit Neovim and run `nvim` again**. The restart allows Neovim to load the plugins that were downloaded during the first session.
-
-### 2\. Clearing Configuration Cache
-
-If you encounter persistent permission or configuration issues, the state may be corrupt. You should clear the writable directories created by the flake:
-
-```bash
-# 1. Delete the writable configuration copy (where you can manually edit files)
-rm -rf ~/.config/nvim-global
-
-# 2. Delete the writable data, cache, and installed plugins (necessary after flake updates)
-rm -rf ~/.local/share/nvim-global-data
-```
-
-### 3\. Updating the Installed Profile
-
-If you make changes to the base configuration (or if the `main` branch of this repo is updated), you must manually update your installed profile:
-
-```bash
-nix profile upgrade
-```
