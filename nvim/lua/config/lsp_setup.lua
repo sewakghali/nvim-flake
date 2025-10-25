@@ -1,6 +1,7 @@
 vim.keymap.set("n", "gd", "<Nop>")
 
 vim.lsp.enable("lua_ls")
+vim.lsp.enable("denols")
 
 -- enable autocompletion from language servers
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
