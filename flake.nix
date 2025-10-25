@@ -92,10 +92,7 @@
           packages = [ myNvim ] ++ nvimRuntimeDeps;
 
           shellHook = ''
-            # The logic is now inside the wrapper script, but we can set up the shell
-            # PATH to use the wrapped nvim executable provided by the 'myNvim' package.
             export PATH="${myNvim}/bin:$PATH"
-            # Inform the user
             echo "Neovim dev environment ready. Run 'nvim' to start."
           '';
         };
