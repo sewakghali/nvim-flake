@@ -92,12 +92,14 @@
           program = "${myNvim}/bin/nvim";
         };
 
+        lib.nvimRuntimeDeps = nvimRuntimeDeps;
+      
         # 6. devShell for project-local development
         devShells.default = pkgs.mkShell {
           # Use the 'myNvim' derivation itself to pull in its bin/nvim (the wrapper)
           # and the runtime dependencies.
           packages = [ myNvim ] ++ nvimRuntimeDeps;
-
+          
           shellHook = ''
             export PATH="${myNvim}/bin:$PATH"
             echo "Neovim dev environment ready. Run 'nvim' to start."
