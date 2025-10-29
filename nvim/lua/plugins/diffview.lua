@@ -3,10 +3,10 @@ return {
   dependencies = {
     "nvim-tree/nvim-web-devicons",
   },
-  cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggle" }, 
+  cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewToggle" },
   keys = {
     {
-      "<leader>dv", 
+      "<leader>dv",
       function()
         -- Toggles the Diffview window. If no view is open, it calls DiffviewOpen.
         if next(require("diffview.lib").views) == nil then
@@ -18,9 +18,4 @@ return {
       desc = "Toggle Diffview window",
     },
   },
-  -- Optional: Add configuration options here if needed,
-  -- but the default is usually fine for basic usage.
-  -- config = function()
-  --   require("diffview").setup {}
-  -- end,
 }

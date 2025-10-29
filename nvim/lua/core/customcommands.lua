@@ -1,19 +1,17 @@
 ---------------------------------------------------
 -- Function to commit with a message
 ---------------------------------------------------
--- Utility to strip surrounding quotes
+-- strip surrounding quotes
 local function strip_quotes(str)
   return str:gsub("^[\"']", ""):gsub("[\"']$", "")
 end
 
--- Function to commit with optional quotes or interactive prompt
+-- commit with optional quotes or interactive prompt
 local function git_commit(args)
   local message = nil
 
   if args.fargs and #args.fargs > 0 then
-    -- Join all arguments with spaces
     message = table.concat(args.fargs, " ")
-    -- Remove surrounding quotes if user typed them
     message = strip_quotes(message)
   else
     -- Prompt interactively if no arguments
