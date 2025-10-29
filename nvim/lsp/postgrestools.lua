@@ -1,3 +1,8 @@
+-- -------------------------------------------------------
+-- NOTE:
+-- apparently this extra config does not work here. It must be initialized using "postgrestools init" which will create a postgrestools.jsonc file where we can specify the DB connection config
+-- -------------------------------------------------------
+
 -- local get_env = function(name)
 --   return os.getenv(name) or nil
 -- end
