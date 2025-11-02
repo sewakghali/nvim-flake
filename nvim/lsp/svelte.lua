@@ -2,7 +2,7 @@ return {
   name = "svelte",
   cmd = { "svelteserver", "--stdio" },
   filetypes = { "svelte" },
-  root_dir = require("lspconfig.utils").root_pattern(
+  root_dir = require("lspconfig.util").root_pattern(
     "package-lock.json",
     "svelte.config.js",
     "svelte.config.cjs",
