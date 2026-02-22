@@ -29,4 +29,6 @@ local plugins = {
   },
 }
 
-require("lazy").setup(plugins, {})
+require("lazy").setup(plugins, {
+    lockfile = vim.fn.expand("$HOME") .. "/.local/share/nvim-lazy-lock.json",
+})
