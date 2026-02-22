@@ -27,6 +27,24 @@
         # Get the clean list of base runtime dependencies (ripgrep, fd, etc.)
         baseDeps = base-nvim.lib.${system}.nvimRuntimeDeps;
 
+
+        nvim-shim = pkgs.writeShellScriptBin "nvim" ''
+          # Ensure directories exist
+          mkdir -p "$HOME/.local/share/nvim-project-data"
+          mkdir -p "$HOME/.local/share/nvim-global-data"
+
+          if [ -d "./nvim" ]; then
+            export XDG_CONFIG_HOME="$PWD"
+            export XDG_DATA_HOME="$HOME/.local/share/nvim-project-data"
+            export XDG_STATE_HOME="$HOME/.local/state/nvim-project-state"
+            exec ${pkgs.neovim}/bin/nvim "$@"
+          else
+            export XDG_DATA_HOME="$HOME/.local/share/nvim-global-data"
+            export XDG_STATE_HOME="$HOME/.local/state/nvim-global-state"
+            exec ${myNvim}/bin/nvim "$@"
+          fi
+        '';
+
         # Variables for Connection Setup
         dbName = "lsp_dev_db";
         dbUser = "lsp_user";
@@ -38,7 +56,7 @@
       {
         devShells.default = pkgs.mkShell {
           buildInputs = baseDeps ++ [
-            pkgs.neovim
+            nvim-shim
             pkgs.deno
             pkgs.postgresql_16
             pkgs.postgres-lsp
@@ -55,28 +73,6 @@
           POSTGRES_TEMP_DIR = "./.postgres_data";
 
           shellHook = ''
-            # --- NEOVIM CONFIG SETUP ---
-            nvim() {
-              local PROJECT_DATA="$HOME/.local/share/nvim-project-data"
-              local GLOBAL_DATA="$HOME/.local/share/nvim-global-data"
-              
-              mkdir -p "$PROJECT_DATA" "$GLOBAL_DATA"
-
-              if [ -d "./nvim" ]; then
-                # Exporting explicitly to ensure sub-processes (git/lazy) see them
-                export HOME="$HOME"
-                export XDG_CONFIG_HOME="$PWD"
-                export XDG_DATA_HOME="$PROJECT_DATA"
-                export XDG_STATE_HOME="$HOME/.local/state/nvim-project"
-                ${pkgs.neovim}/bin/nvim "$@"
-              else
-                export HOME="$HOME"
-                export XDG_DATA_HOME="$GLOBAL_DATA"
-                export XDG_STATE_HOME="$HOME/.local/state/nvim-global"
-                ${myNvim}/bin/nvim "$@"
-              fi
-            }
-
             # --- POSTGRES SERVER SETUP ---
             echo "Initializing temporary PostgreSQL server..."
 
