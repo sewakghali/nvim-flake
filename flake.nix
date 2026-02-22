@@ -1,5 +1,5 @@
 {
-  description = "Portable Neovim flake - Streamlined";
+  description = "Portable Neovim and Terminal Environment Flake";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -11,33 +11,61 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
-        runtimeDeps = with pkgs; [ ripgrep fd git stylua lua-language-server nil tree-sitter nodejs_24];
+        # neovim
+        nvimDeps = with pkgs; [
+          ripgrep
+          fd
+          git
+          stylua
+          lua-language-server
+          nil
+          tree-sitter
+          nodejs_24
+        ];
 
+        # environment
+        shellDeps = with pkgs; [
+          zellij
+          zsh
+        ];
+
+        # wrapped nvim
         myNvim = pkgs.symlinkJoin {
           name = "nvim-flake";
           paths = [ pkgs.neovim ];
           buildInputs = [ pkgs.makeWrapper ];
           postBuild = ''
             wrapProgram $out/bin/nvim \
-              --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps} \
+              --prefix PATH : ${pkgs.lib.makeBinPath nvimDeps} \
               --set-default XDG_CONFIG_HOME "${./.}" \
               --set-default XDG_DATA_HOME "$HOME/.local/share/nvim-global-data"
           '';
         };
       in
       {
-        lib.nvimRuntimeDeps = runtimeDeps;
         packages.default = myNvim;
+        
+        packages.everything = pkgs.symlinkJoin {
+          name = "my-total-env";
+          paths = [ myNvim pkgs.zellij pkgs.zsh ];
+        };
 
         devShells.default = pkgs.mkShell {
-          packages = runtimeDeps;
+          packages = nvimDeps ++ shellDeps;
+
           shellHook = ''
+            export SHELL="${pkgs.zsh}/bin/zsh"
+            export ZELLIJ_CONFIG_FILE="${./.}/zellij/config.kdl"
+
+            # Uses project-local config if an 'nvim' folder exists, 
+            # otherwise uses the wrapped flake version.
             nvim() {
               if [ -d "./nvim" ]; then
-                echo "Using project-local config" >&2
-                XDG_CONFIG_HOME="$PWD" XDG_DATA_HOME="$HOME/.local/share/nvim-project-data" ${pkgs.neovim}/bin/nvim "$@"
+                echo "--- Using project-local Neovim config ---" >&2
+                XDG_CONFIG_HOME="$PWD" \
+                XDG_DATA_HOME="$HOME/.local/share/nvim-project-data" \
+                ${pkgs.neovim}/bin/nvim "$@"
               else
-                # Just use the package we already built!
                 ${myNvim}/bin/nvim "$@"
               fi
             }

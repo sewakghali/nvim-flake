@@ -11,5 +11,6 @@ return {
     vim.keymap.set("n", "<leader>gc", builtin.git_commits, {})
     vim.keymap.set("n", "<leader>gb", builtin.git_branches, {})
     vim.keymap.set("n", "<leader>gst", builtin.git_stash, {})
+    vim.keymap.set("n", "<leader>gp", builtin.lsp_incoming_calls, {})
   end,
 }
