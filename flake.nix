@@ -20,8 +20,8 @@
           postBuild = ''
             wrapProgram $out/bin/nvim \
               --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps} \
-              --add-flags "-u ${./.}/nvim/init.lua" \
-              --set XDG_DATA_HOME "$HOME/.local/share/nvim-global-data"
+              --set-default XDG_CONFIG_HOME "${./.}" \
+              --set-default XDG_DATA_HOME "$HOME/.local/share/nvim-global-data"
           '';
         };
       in
