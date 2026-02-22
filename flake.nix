@@ -43,11 +43,17 @@
         };
       in
       {
-        packages.default = myNvim;
-        
-        packages.everything = pkgs.symlinkJoin {
-          name = "my-total-env";
-          paths = [ myNvim pkgs.zellij pkgs.zsh ];
+        lib = {
+          inherit nvimDeps shellDeps;
+        };
+
+        packages = {
+          default = myNvim;
+          
+          everything = pkgs.symlinkJoin {
+            name = "my-total-env";
+            paths = [ myNvim pkgs.zellij pkgs.zsh ];
+          };
         };
 
         devShells.default = pkgs.mkShell {
