@@ -11,7 +11,7 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
-        runtimeDeps = with pkgs; [ ripgrep fd git stylua lua-language-server nil ];
+        runtimeDeps = with pkgs; [ ripgrep fd git stylua lua-language-server nil tree-sitter nodejs_24];
 
         myNvim = pkgs.symlinkJoin {
           name = "nvim-flake";
