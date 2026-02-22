@@ -32,7 +32,6 @@
         zellij-shim = pkgs.writeShellScriptBin "zellij" ''
           export ZELLIJ_CONFIG_FILE="${base-nvim}/zellij/config.kdl"
           export SHELL="${pkgs.zsh}/bin/zsh"
-          # Use 'exec' so zellij takes over the process properly
           exec ${pkgs.zellij}/bin/zellij "$@"
         '';
 
@@ -80,8 +79,9 @@
 
           # Directory for the temporary database files (relative to project root)
           POSTGRES_TEMP_DIR = "./.postgres_data";
-
           shellHook = ''
+            export SHELL="${pkgs.zsh}/bin/zsh"
+
             # --- POSTGRES SERVER SETUP ---
             echo "Initializing temporary PostgreSQL server..."
 
@@ -115,9 +115,7 @@
             if ${pkgs.postgresql_16}/bin/psql -h ${dbHost} -p ${dbPort} -U ${dbUser} -d ${dbName} -c '\q' 2>/dev/null; then
                 echo "DB Connection SUCCESSFUL via psql."
             else
-                echo "DB Connection FAILED! Check logs in $
-  vim.lsp.enable("nil")
-  /log"
+                echo "DB Connection FAILED! Check logs in $POSTGRES_TEMP_DIR/log"
             fi
             
             # Unset PGPASSWORD immediately after test
