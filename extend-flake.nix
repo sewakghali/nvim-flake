@@ -24,9 +24,17 @@
 
         myNvim = base-nvim.packages.${system}.default;
 
-        # Get the clean list of base runtime dependencies (ripgrep, fd, etc.)
-        baseDeps = base-nvim.lib.${system}.nvimRuntimeDeps;
+        # base runtime dependencies (ripgrep, fd, etc.)
+        baseDeps = base-nvim.lib.${system}.nvimDeps;
+        # zsh, zellij
+        shellDeps = base-nvim.lib.${system}.shellDeps;
 
+        zellij-shim = pkgs.writeShellScriptBin "zellij" ''
+          export ZELLIJ_CONFIG_FILE="${base-nvim}/zellij/config.kdl"
+          export SHELL="${pkgs.zsh}/bin/zsh"
+          # Use 'exec' so zellij takes over the process properly
+          exec ${pkgs.zellij}/bin/zellij "$@"
+        '';
 
         nvim-shim = pkgs.writeShellScriptBin "nvim" ''
           # Ensure directories exist
@@ -55,8 +63,9 @@
       in
       {
         devShells.default = pkgs.mkShell {
-          buildInputs = baseDeps ++ [
+          buildInputs = baseDeps ++ shellDeps ++ [
             nvim-shim
+            zellij-shim
             pkgs.deno
             pkgs.postgresql_16
             pkgs.postgres-lsp
