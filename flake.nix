@@ -20,7 +20,7 @@
           postBuild = ''
             wrapProgram $out/bin/nvim \
               --prefix PATH : ${pkgs.lib.makeBinPath runtimeDeps} \
-              --set XDG_CONFIG_HOME "${./.}/share" \
+              --add-flags "-u ${./.}/nvim/init.lua" \
               --set XDG_DATA_HOME "$HOME/.local/share/nvim-global-data"
           '';
         };
@@ -34,7 +34,7 @@
           shellHook = ''
             nvim() {
               if [ -d "./nvim" ]; then
-                echo "💡 Using project-local config" >&2
+                echo "Using project-local config" >&2
                 XDG_CONFIG_HOME="$PWD" XDG_DATA_HOME="$HOME/.local/share/nvim-project-data" ${pkgs.neovim}/bin/nvim "$@"
               else
                 # Just use the package we already built!
